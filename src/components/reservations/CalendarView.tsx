@@ -6,6 +6,7 @@ import { Reservation } from '@/hooks/reservations';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { useLanguage } from "@/hooks/language";
 
 interface CalendarViewProps {
   reservations: Reservation[];
@@ -14,6 +15,7 @@ interface CalendarViewProps {
 export const CalendarView: React.FC<CalendarViewProps> = ({ reservations }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [reservationsOnDate, setReservationsOnDate] = useState<Reservation[]>([]);
+  const { t } = useLanguage();
   
   // Convertir les dates de chaîne en objets Date
   const reservationsWithDates = reservations.map(res => ({
@@ -65,6 +67,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ reservations }) => {
     }
   };
 
+  // Format date strings to locale format
+  const formatDateString = (dateString: string) => {
+    return format(new Date(dateString), 'dd/MM/yyyy');
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div className="md:col-span-2">
@@ -103,7 +110,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ reservations }) => {
                 <div className="flex items-center space-x-2 mb-4">
                   <CalendarIcon className="h-5 w-5 text-gray-500" />
                   <h3 className="font-medium">
-                    Réservations du {format(selectedDate, 'dd/MM/yyyy')}
+                    {t('reservations_for') || 'Réservations du'} {format(selectedDate, 'dd/MM/yyyy')}
                   </h3>
                 </div>
                 
@@ -115,11 +122,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ reservations }) => {
                         <div className="text-sm text-gray-500">{res.listingLocation}</div>
                         <div className="flex justify-between items-center mt-2">
                           <div className="text-xs">
-                            {format(new Date(res.checkIn), 'dd/MM')} - {format(new Date(res.checkOut), 'dd/MM/yyyy')}
+                            {formatDateString(res.checkIn)} - {formatDateString(res.checkOut)}
                           </div>
                           <Badge className={getStatusColor(res.status)}>
-                            {res.status === 'confirmed' ? 'Confirmée' : 
-                             res.status === 'pending' ? 'En attente' : 'Annulée'}
+                            {res.status === 'confirmed' ? (t('confirmed') || 'Confirmée') : 
+                             res.status === 'pending' ? (t('pending') || 'En attente') : (t('cancelled') || 'Annulée')}
                           </Badge>
                         </div>
                       </div>
@@ -127,13 +134,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ reservations }) => {
                   </div>
                 ) : (
                   <div className="text-center py-6 text-gray-500">
-                    Aucune réservation pour cette date
+                    {t('no_reservations_for_date') || 'Aucune réservation pour cette date'}
                   </div>
                 )}
               </>
             ) : (
               <div className="text-center py-6 text-gray-500">
-                Sélectionnez une date pour voir les réservations
+                {t('select_date_to_see_reservations') || 'Sélectionnez une date pour voir les réservations'}
               </div>
             )}
           </CardContent>

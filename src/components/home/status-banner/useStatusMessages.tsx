@@ -9,8 +9,10 @@ export const useStatusMessages = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  // Use a ref to prevent infinite re-renders
+  
+  // Use refs to prevent infinite re-renders and track initialization
   const loadedRef = useRef(false);
+  const initializedRef = useRef(false);
 
   // Fonction pour charger les messages du stockage local
   const loadMessages = useCallback(() => {
@@ -26,9 +28,9 @@ export const useStatusMessages = () => {
       
       // Convert user statuses to the same format if needed
       const convertedUserStatuses = Array.isArray(userStatuses) ? userStatuses.map((status: any) => ({
-        id: String(status.id),
+        id: String(status.id || Date.now()),
         text: status.content || '',
-        imageUrl: status.image,
+        imageUrl: status.image || '',
         createdAt: status.timestamp instanceof Date ? status.timestamp.toISOString() : new Date().toISOString(),
         active: true,
         type: 'info',
@@ -48,16 +50,26 @@ export const useStatusMessages = () => {
       
       // Filter for active messages only
       const activeMessages = allMessages.filter((msg: any) => {
+        // Safety check for message structure
+        if (!msg) return false;
+        
         // Check if message is active
         const isActive = msg.active !== false;
         
-        // Check if message is less than 24 hours old
-        const createdAt = new Date(msg.createdAt);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
-        const isRecent = hoursDiff < 24;
+        // Check if message has a createdAt date
+        if (!msg.createdAt) return isActive;
         
-        return isActive && isRecent;
+        // Check if message is less than 24 hours old
+        try {
+          const createdAt = new Date(msg.createdAt);
+          const now = new Date();
+          const hoursDiff = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+          const isRecent = hoursDiff < 24;
+          return isActive && isRecent;
+        } catch (e) {
+          console.error("Error parsing date:", e);
+          return isActive;
+        }
       });
       
       setMessages(activeMessages);
@@ -82,6 +94,10 @@ export const useStatusMessages = () => {
 
   // Charger les messages au montage du composant
   useEffect(() => {
+    // Only run initialization once
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+    
     loadMessages();
     
     // Ajouter un écouteur d'événement pour les mises à jour du stockage
@@ -120,8 +136,16 @@ export const useStatusMessages = () => {
     setIsVisible(false);
   }, []);
 
+  // Safe getter for current message with type checking
+  const getCurrentMessage = () => {
+    if (!messages || messages.length === 0 || currentIndex >= messages.length) {
+      return null;
+    }
+    return messages[currentIndex];
+  };
+
   return {
-    currentMessage: messages[currentIndex],
+    currentMessage: getCurrentMessage(),
     hasMessages: messages.length > 0,
     isVisible,
     hasLoaded,

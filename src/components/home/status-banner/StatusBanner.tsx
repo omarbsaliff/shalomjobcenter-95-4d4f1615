@@ -1,5 +1,5 @@
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStatusMessages } from './useStatusMessages';
 import { StatusContent } from './StatusContent';
@@ -24,7 +24,12 @@ export const StatusBanner: React.FC = memo(() => {
   }
 
   // Safety check for currentMessage
-  const messageText = currentMessage && typeof currentMessage === 'object' ? currentMessage.text || "" : "";
+  const messageText = useMemo(() => {
+    if (!currentMessage) return "";
+    return typeof currentMessage === 'object' && currentMessage !== null 
+      ? currentMessage.text || "" 
+      : "";
+  }, [currentMessage]);
 
   return (
     <AnimatePresence>
@@ -58,3 +63,5 @@ export const StatusBanner: React.FC = memo(() => {
     </AnimatePresence>
   );
 });
+
+StatusBanner.displayName = 'StatusBanner';

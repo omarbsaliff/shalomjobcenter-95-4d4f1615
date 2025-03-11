@@ -27,9 +27,24 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: false, // Gardons les console.log pour le debug
+        drop_console: false, // Keeping console.log for debugging
         drop_debugger: true,
       },
     },
+    // Add rollup options to better handle dependencies
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Ignore certain warnings
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE' || 
+            warning.message.includes('date-fns')) {
+          return;
+        }
+        warn(warning);
+      }
+    }
+  },
+  optimizeDeps: {
+    include: ['date-fns'],
+    force: true
   }
 }));

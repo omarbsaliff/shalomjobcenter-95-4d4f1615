@@ -1,14 +1,16 @@
 
 import { Reservation } from "@/hooks/reservations"; 
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 // Format date strings to locale format
 export const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('fr-FR', {
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric'
-  });
+  try {
+    return format(new Date(dateString), 'dd/MM/yyyy');
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
 };
 
 // Export data to CSV
