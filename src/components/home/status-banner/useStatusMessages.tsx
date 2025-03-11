@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 
 export const useStatusMessages = () => {
@@ -9,10 +9,14 @@ export const useStatusMessages = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  // Use a ref to prevent infinite re-renders
+  const loadedRef = useRef(false);
 
   // Fonction pour charger les messages du stockage local
   const loadMessages = useCallback(() => {
     try {
+      if (loadedRef.current) return; // Prevent multiple initial loads
+      
       // Try loading admin status messages first
       const storedMessages = loadData('admin-status-messages', []);
       let adminMessages = Array.isArray(storedMessages) ? storedMessages : [];
@@ -64,6 +68,7 @@ export const useStatusMessages = () => {
       }
       
       setHasLoaded(true);
+      loadedRef.current = true; // Mark as loaded
       
       console.info("Statuts actifs chargés:", activeMessages.length);
     } catch (error) {
@@ -71,22 +76,30 @@ export const useStatusMessages = () => {
       setMessages([]);
       setIsVisible(false);
       setHasLoaded(true);
+      loadedRef.current = true; // Mark as loaded even on error
     }
-  }, [currentIndex, isDismissed, loadData]);
+  }, [loadData, currentIndex, isDismissed]);
 
   // Charger les messages au montage du composant
   useEffect(() => {
     loadMessages();
     
     // Ajouter un écouteur d'événement pour les mises à jour du stockage
-    const handleStorageChange = () => {
-      loadMessages();
+    const handleStorageChange = (e: StorageEvent) => {
+      // Only reload if relevant storage items change
+      if (e.key === 'admin-status-messages' || e.key === 'user-statuses') {
+        loadedRef.current = false; // Reset loaded state to allow reloading
+        loadMessages();
+      }
     };
     
     window.addEventListener('storage', handleStorageChange);
     
     // Check for new messages every minute
-    const intervalId = setInterval(loadMessages, 60000);
+    const intervalId = setInterval(() => {
+      loadedRef.current = false; // Reset loaded state to allow reloading
+      loadMessages();
+    }, 60000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);

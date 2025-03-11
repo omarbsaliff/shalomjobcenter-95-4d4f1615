@@ -1,12 +1,13 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStatusMessages } from './useStatusMessages';
 import { StatusContent } from './StatusContent';
 import { BannerBackground } from './BannerBackground';
 import { CloseButton } from './CloseButton';
 
-export const StatusBanner: React.FC = () => {
+// Using memo to prevent unnecessary re-renders
+export const StatusBanner: React.FC = memo(() => {
   const { 
     messages,
     currentIndex,
@@ -17,10 +18,13 @@ export const StatusBanner: React.FC = () => {
     currentMessage
   } = useStatusMessages();
   
-  // Attendre que les messages se chargent et retourner null si pas visible
+  // Early return if banner should not be visible
   if (!hasLoaded || !isVisible || isDismissed || !messages || messages.length === 0) {
     return null;
   }
+
+  // Safety check for currentMessage
+  const messageText = currentMessage && typeof currentMessage === 'object' ? currentMessage.text || "" : "";
 
   return (
     <AnimatePresence>
@@ -44,7 +48,7 @@ export const StatusBanner: React.FC = () => {
           
           {/* Contenu défilant */}
           <div className="relative flex items-center justify-center w-full h-full px-4">
-            <StatusContent message={currentMessage?.text || ""} />
+            <StatusContent message={messageText} />
           </div>
           
           {/* Bouton de fermeture */}
@@ -53,4 +57,4 @@ export const StatusBanner: React.FC = () => {
       </motion.div>
     </AnimatePresence>
   );
-};
+});
