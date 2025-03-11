@@ -1,12 +1,21 @@
 
 import { Reservation } from "@/hooks/reservations"; 
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 // Format date strings to locale format
 export const formatDate = (dateString: string) => {
   try {
-    return format(new Date(dateString), 'dd/MM/yyyy');
+    // Essayer de parser la chaîne de date
+    const date = parseISO(dateString);
+    
+    // Vérifier si la date est valide
+    if (!isValid(date)) {
+      console.warn("Invalid date string:", dateString);
+      return dateString;
+    }
+    
+    return format(date, 'dd/MM/yyyy');
   } catch (error) {
     console.error("Error formatting date:", error);
     return dateString;
@@ -27,7 +36,7 @@ export const exportToCSV = (
     
     // Données
     data.forEach((reservation: Reservation) => {
-      csvContent += `"${reservation.id}","${reservation.guestName}","${reservation.guestEmail}","${reservation.listingTitle}","${reservation.listingLocation}","${reservation.checkIn}","${reservation.checkOut}","${reservation.guests}","${reservation.totalPrice}","${reservation.status}","${reservation.createdAt}"\n`;
+      csvContent += `"${reservation.id}","${reservation.guestName}","${reservation.guestEmail}","${reservation.listingTitle}","${reservation.listingLocation}","${formatDate(reservation.checkIn)}","${formatDate(reservation.checkOut)}","${reservation.guests}","${reservation.totalPrice}","${reservation.status}","${formatDate(reservation.createdAt)}"\n`;
     });
     
     filename = `reservations_export_${new Date().toISOString().split('T')[0]}.csv`;
@@ -37,7 +46,7 @@ export const exportToCSV = (
     
     // Données
     data.forEach((item: any) => {
-      csvContent += `"${item.application.id}","${item.application.applicantName}","${item.application.email}","${item.application.phone}","${item.job.title}","${item.job.location}","${item.application.submittedAt}","${item.application.status}"\n`;
+      csvContent += `"${item.application.id}","${item.application.applicantName}","${item.application.email}","${item.application.phone}","${item.job.title}","${item.job.location}","${formatDate(item.application.submittedAt)}","${item.application.status}"\n`;
     });
     
     filename = `candidatures_export_${new Date().toISOString().split('T')[0]}.csv`;

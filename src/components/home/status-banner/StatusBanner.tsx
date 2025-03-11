@@ -23,13 +23,23 @@ export const StatusBanner: React.FC = memo(() => {
     return null;
   }
 
-  // Safety check for currentMessage
+  // Safely extract message text with memoization
   const messageText = useMemo(() => {
-    if (!currentMessage) return "";
-    return typeof currentMessage === 'object' && currentMessage !== null 
-      ? currentMessage.text || "" 
-      : "";
+    try {
+      if (!currentMessage) return "";
+      return typeof currentMessage === 'object' && currentMessage !== null 
+        ? (currentMessage.text || "") 
+        : String(currentMessage || "");
+    } catch (error) {
+      console.error("Error formatting message:", error);
+      return "";
+    }
   }, [currentMessage]);
+
+  // If no valid message text, don't render
+  if (!messageText) {
+    return null;
+  }
 
   return (
     <AnimatePresence>

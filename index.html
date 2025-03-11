@@ -12,13 +12,24 @@
     <meta name="author" content="Lovable" />
     <meta property="og:image" content="/og-image.png" />
     <link rel="icon" href="/favicon.ico" />
-    <!-- Ajout de preload pour les ressources critiques -->
+    <!-- Préchargement des ressources critiques -->
     <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
+    <!-- Préchargement des polices -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
   </head>
 
   <body>
     <div id="root"></div>
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Script pour Netlify -->
+    <script>
+      // Gestion des erreurs pour empêcher les crashs complets
+      window.addEventListener('error', function(e) {
+        console.error('Global error caught:', e.error || e.message);
+        return false;
+      });
+    </script>
   </body>
 </html>

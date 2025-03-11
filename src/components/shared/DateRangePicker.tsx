@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/hooks/language";
+import { format } from "date-fns";
 
 interface DateRangePickerProps {
   startDate: string;
@@ -21,7 +22,17 @@ const DateRangePicker = ({
   const { t } = useLanguage();
   
   // Get today's date in YYYY-MM-DD format for min attribute
-  const today = new Date().toISOString().split("T")[0];
+  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+
+  const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setStartDate(newDate);
+    
+    // If end date is before new start date, update end date
+    if (endDate && new Date(endDate) < new Date(newDate)) {
+      setEndDate(newDate);
+    }
+  };
 
   return (
     <div className={`border rounded-lg overflow-hidden ${className}`}>
@@ -32,7 +43,7 @@ const DateRangePicker = ({
             type="date"
             className="w-full focus:outline-none text-sm"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={handleStartDateChange}
             min={today}
           />
         </div>
@@ -51,4 +62,4 @@ const DateRangePicker = ({
   );
 };
 
-export default DateRangePicker;
+export default React.memo(DateRangePicker);

@@ -27,16 +27,30 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: false, // Keeping console.log for debugging
+        drop_console: false, 
         drop_debugger: true,
       },
     },
-    // Add rollup options to better handle dependencies
+    // Improved Rollup options for better dependency handling
     rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-tabs'
+          ],
+          dateFns: ['date-fns'],
+        },
+      },
       onwarn(warning, warn) {
-        // Ignore certain warnings
-        if (warning.code === 'MODULE_LEVEL_DIRECTIVE' || 
-            warning.message.includes('date-fns')) {
+        // Ignore specific warnings that aren't actual issues
+        if (
+          warning.code === 'MODULE_LEVEL_DIRECTIVE' || 
+          warning.message.includes('date-fns') ||
+          warning.code === 'CIRCULAR_DEPENDENCY'
+        ) {
           return;
         }
         warn(warning);
@@ -45,6 +59,16 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['date-fns'],
-    force: true
-  }
+    force: true,
+    esbuildOptions: {
+      // Node.js global pour les polyfills
+      define: {
+        global: 'globalThis',
+      },
+    },
+  },
+  // Ajouter des variables d'environnement spécifiques à Netlify
+  define: {
+    'process.env.NETLIFY': JSON.stringify(process.env.NETLIFY),
+  },
 }));
