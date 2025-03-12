@@ -80,6 +80,5 @@
 [build.processing.images]
   compress = true
 
-# Add fallback to make sure public redirects are used
-[build.edge_functions]
-  node_bundler = "esbuild"
+# Define edge functions directory (corrected syntax)
+edge_functions = "edge-functions"
