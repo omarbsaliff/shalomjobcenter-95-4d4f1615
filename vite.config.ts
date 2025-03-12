@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Optimize build output for production
+  // Optimize build output for production and Netlify
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -41,6 +41,7 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-dropdown-menu',
             '@radix-ui/react-tabs'
           ],
+          // Split date-fns into a separate chunk
           dateFns: ['date-fns'],
         },
       },
@@ -61,13 +62,13 @@ export default defineConfig(({ mode }) => ({
     include: ['date-fns'],
     force: true,
     esbuildOptions: {
-      // Node.js global pour les polyfills
+      // Node.js global for polyfills
       define: {
         global: 'globalThis',
       },
     },
   },
-  // Ajouter des variables d'environnement spécifiques à Netlify
+  // Configure environment variables for Netlify
   define: {
     'process.env.NETLIFY': JSON.stringify(process.env.NETLIFY),
   },

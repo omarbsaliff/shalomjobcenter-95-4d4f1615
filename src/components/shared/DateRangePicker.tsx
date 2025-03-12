@@ -2,7 +2,7 @@
 import React, { useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from "@/hooks/language";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface DateRangePickerProps {
   startDate: string;
@@ -31,6 +31,18 @@ const DateRangePicker = ({
     // If end date is before new start date, update end date
     if (endDate && new Date(endDate) < new Date(newDate)) {
       setEndDate(newDate);
+    }
+  };
+
+  // Format date for display if needed
+  const formatDateString = (dateString: string): string => {
+    try {
+      if (!dateString) return '';
+      const date = parseISO(dateString);
+      return isValid(date) ? format(date, 'yyyy-MM-dd') : dateString;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
     }
   };
 

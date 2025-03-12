@@ -6,10 +6,13 @@ import { format, isValid, parseISO } from "date-fns";
 // Format date strings to locale format
 export const formatDate = (dateString: string) => {
   try {
-    // Essayer de parser la chaîne de date
+    // If dateString is empty or null, return empty string
+    if (!dateString) return "";
+    
+    // Try to parse the date string
     const date = parseISO(dateString);
     
-    // Vérifier si la date est valide
+    // Check if the date is valid
     if (!isValid(date)) {
       console.warn("Invalid date string:", dateString);
       return dateString;
@@ -27,6 +30,11 @@ export const exportToCSV = (
   type: 'reservations' | 'applications', 
   data: any[]
 ) => {
+  if (!data || data.length === 0) {
+    toast.error(`Aucune donnée à exporter pour les ${type === 'reservations' ? 'réservations' : 'candidatures'}`);
+    return;
+  }
+  
   let csvContent = '';
   let filename = '';
   
@@ -36,7 +44,7 @@ export const exportToCSV = (
     
     // Données
     data.forEach((reservation: Reservation) => {
-      csvContent += `"${reservation.id}","${reservation.guestName}","${reservation.guestEmail}","${reservation.listingTitle}","${reservation.listingLocation}","${formatDate(reservation.checkIn)}","${formatDate(reservation.checkOut)}","${reservation.guests}","${reservation.totalPrice}","${reservation.status}","${formatDate(reservation.createdAt)}"\n`;
+      csvContent += `"${reservation.id || ''}","${reservation.guestName || ''}","${reservation.guestEmail || ''}","${reservation.listingTitle || ''}","${reservation.listingLocation || ''}","${formatDate(reservation.checkIn)}","${formatDate(reservation.checkOut)}","${reservation.guests || ''}","${reservation.totalPrice || ''}","${reservation.status || ''}","${formatDate(reservation.createdAt)}"\n`;
     });
     
     filename = `reservations_export_${new Date().toISOString().split('T')[0]}.csv`;
@@ -46,7 +54,9 @@ export const exportToCSV = (
     
     // Données
     data.forEach((item: any) => {
-      csvContent += `"${item.application.id}","${item.application.applicantName}","${item.application.email}","${item.application.phone}","${item.job.title}","${item.job.location}","${formatDate(item.application.submittedAt)}","${item.application.status}"\n`;
+      if (item && item.application) {
+        csvContent += `"${item.application.id || ''}","${item.application.applicantName || ''}","${item.application.email || ''}","${item.application.phone || ''}","${item.job?.title || ''}","${item.job?.location || ''}","${formatDate(item.application.submittedAt)}","${item.application.status || ''}"\n`;
+      }
     });
     
     filename = `candidatures_export_${new Date().toISOString().split('T')[0]}.csv`;

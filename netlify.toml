@@ -1,23 +1,28 @@
 
-# Configuration Netlify optimisée
+# Optimized Netlify Configuration
 
 [build]
-  # Répertoire de publication (répertoire de sortie de build par défaut pour Vite)
+  # Publication directory (default output directory for Vite)
   publish = "dist"
-  # Commande de build
-  command = "CI= npm run build"
+  # Build command with dependency resolution flag
+  command = "npm install --legacy-peer-deps && npm run build"
 
-# Ajout d'en-têtes de cache pour améliorer les performances
+# Cache control headers for better performance
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
 [[headers]]
   for = "/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Cache-Control = "public, max-age=3600"
 
-# Gestion du routage SPA en redirigeant tous les chemins vers index.html
+# SPA routing - redirect all paths to index.html for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = true
-

@@ -23,8 +23,8 @@ export const StatusBanner: React.FC = memo(() => {
     return null;
   }
 
-  // Safely extract message text with memoization
-  const messageText = useMemo(() => {
+  // Safely extract message text
+  const messageText = (() => {
     try {
       if (!currentMessage) return "";
       return typeof currentMessage === 'object' && currentMessage !== null 
@@ -34,7 +34,7 @@ export const StatusBanner: React.FC = memo(() => {
       console.error("Error formatting message:", error);
       return "";
     }
-  }, [currentMessage]);
+  })();
 
   // If no valid message text, don't render
   if (!messageText) {
