@@ -30,6 +30,9 @@ export default defineConfig(({ mode }) => ({
         drop_console: false, 
         drop_debugger: true,
       },
+      format: {
+        comments: false,
+      }
     },
     // Improved Rollup options for better dependency handling
     rollupOptions: {
