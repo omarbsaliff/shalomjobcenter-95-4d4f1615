@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => ({
     sourcemap: false,
     minify: 'terser',
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1600, // Augmenté pour éviter trop d'avertissements
     terserOptions: {
       compress: {
         drop_console: false, 
@@ -34,7 +34,10 @@ export default defineConfig(({ mode }) => ({
       },
       format: {
         comments: false,
-      }
+      },
+      // Options supplémentaires pour la stabilité
+      keep_classnames: true,
+      keep_fnames: true,
     },
     // Improved Rollup options for better dependency handling
     rollupOptions: {
@@ -59,7 +62,8 @@ export default defineConfig(({ mode }) => ({
         if (
           warning.code === 'MODULE_LEVEL_DIRECTIVE' || 
           warning.message.includes('date-fns') ||
-          warning.code === 'CIRCULAR_DEPENDENCY'
+          warning.code === 'CIRCULAR_DEPENDENCY' ||
+          warning.message.includes('sourcemap')
         ) {
           return;
         }
@@ -80,5 +84,12 @@ export default defineConfig(({ mode }) => ({
   // Configure environment variables for Netlify
   define: {
     'process.env.NETLIFY': JSON.stringify(process.env.NETLIFY),
+  },
+  // Améliorations de la stabilité CSS
+  css: {
+    devSourcemap: false,
+    modules: {
+      scopeBehaviour: 'local'
+    },
   },
 }));

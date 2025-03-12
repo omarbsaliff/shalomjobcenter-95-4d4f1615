@@ -1,5 +1,8 @@
 
+/* Commencer par les variables pour qu'elles soient disponibles pour les autres fichiers */
 @import './variables.css';
+
+/* Ensuite les styles de base et de layout */
 @import './layout.css';
 @import './header.css';
 @import './inputs.css';

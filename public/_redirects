@@ -1,9 +1,9 @@
 
-# Redirection pour SPA
+# Redirection for SPA
 /*  /index.html  200
 
-# Redirection pour les anciens URLs
+# Redirection for old URLs
 /old-path  /new-path  301
 
-# Redirection pour les ressources manquantes
+# Redirection for missing resources
 /assets/*  /assets/placeholder.png  404
