@@ -29,7 +29,6 @@
 
   <body>
     <div id="root"></div>
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     <!-- Script pour Netlify -->
     <script>
@@ -49,6 +48,33 @@
           window.location.href = '/';
         }
       }
+      
+      // Script post-build pour nettoyer les erreurs potentielles
+      document.addEventListener('DOMContentLoaded', function() {
+        // Vérifier si le CSS est correctement chargé
+        const allStyles = document.querySelectorAll('link[rel="stylesheet"]');
+        allStyles.forEach(style => {
+          if (!style.sheet) {
+            console.warn('Style sheet not loaded:', style.href);
+            // Tentative de rechargement
+            const newLink = document.createElement('link');
+            newLink.rel = 'stylesheet';
+            newLink.href = style.href;
+            document.head.appendChild(newLink);
+          }
+        });
+        
+        // Vérifier si les images clés sont chargées
+        setTimeout(() => {
+          const criticalImages = document.querySelectorAll('img[data-critical="true"]');
+          criticalImages.forEach(img => {
+            if (!img.complete) {
+              console.warn('Critical image not loaded:', img.src);
+              img.src = img.src; // Tentative de rechargement
+            }
+          });
+        }, 2000);
+      });
     </script>
   </body>
 </html>

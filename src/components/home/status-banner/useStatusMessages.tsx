@@ -98,29 +98,35 @@ export const useStatusMessages = () => {
     if (initializedRef.current) return;
     initializedRef.current = true;
     
-    loadMessages();
-    
-    // Ajouter un écouteur d'événement pour les mises à jour du stockage
-    const handleStorageChange = (e: StorageEvent) => {
-      // Only reload if relevant storage items change
-      if (e.key === 'admin-status-messages' || e.key === 'user-statuses') {
+    // Wrapping in try-catch for added safety
+    try {
+      loadMessages();
+      
+      // Ajouter un écouteur d'événement pour les mises à jour du stockage
+      const handleStorageChange = (e: StorageEvent) => {
+        // Only reload if relevant storage items change
+        if (e.key === 'admin-status-messages' || e.key === 'user-statuses') {
+          loadedRef.current = false; // Reset loaded state to allow reloading
+          loadMessages();
+        }
+      };
+      
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Check for new messages every minute
+      const intervalId = setInterval(() => {
         loadedRef.current = false; // Reset loaded state to allow reloading
         loadMessages();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Check for new messages every minute
-    const intervalId = setInterval(() => {
-      loadedRef.current = false; // Reset loaded state to allow reloading
-      loadMessages();
-    }, 60000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(intervalId);
-    };
+      }, 60000);
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        clearInterval(intervalId);
+      };
+    } catch (error) {
+      console.error("Error in useEffect:", error);
+      setHasLoaded(true); // Ensure loading state is completed even on error
+    }
   }, [loadMessages]);
 
   // Fonction pour passer au message suivant
@@ -138,10 +144,15 @@ export const useStatusMessages = () => {
 
   // Safe getter for current message with type checking
   const getCurrentMessage = () => {
-    if (!messages || messages.length === 0 || currentIndex >= messages.length) {
+    try {
+      if (!messages || messages.length === 0 || currentIndex >= messages.length) {
+        return null;
+      }
+      return messages[currentIndex];
+    } catch (error) {
+      console.error("Error getting current message:", error);
       return null;
     }
-    return messages[currentIndex];
   };
 
   return {

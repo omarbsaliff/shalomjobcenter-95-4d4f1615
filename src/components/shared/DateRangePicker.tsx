@@ -22,15 +22,31 @@ const DateRangePicker = ({
   const { t } = useLanguage();
   
   // Get today's date in YYYY-MM-DD format for min attribute
-  const today = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const today = useMemo(() => {
+    try {
+      return new Date().toISOString().split("T")[0];
+    } catch (error) {
+      console.error("Error formatting today's date:", error);
+      // Fallback if toISOString fails
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  }, []);
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = e.target.value;
-    setStartDate(newDate);
-    
-    // If end date is before new start date, update end date
-    if (endDate && new Date(endDate) < new Date(newDate)) {
-      setEndDate(newDate);
+    try {
+      const newDate = e.target.value;
+      setStartDate(newDate);
+      
+      // If end date is before new start date, update end date
+      if (endDate && new Date(endDate) < new Date(newDate)) {
+        setEndDate(newDate);
+      }
+    } catch (error) {
+      console.error("Error in handleStartDateChange:", error);
     }
   };
 

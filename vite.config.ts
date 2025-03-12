@@ -25,6 +25,8 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     sourcemap: false,
     minify: 'terser',
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
     terserOptions: {
       compress: {
         drop_console: false, 
@@ -47,6 +49,10 @@ export default defineConfig(({ mode }) => ({
           // Split date-fns into a separate chunk
           dateFns: ['date-fns'],
         },
+        // Ensure small chunks for better loading
+        assetFileNames: 'assets/[name].[hash].[ext]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js',
       },
       onwarn(warning, warn) {
         // Ignore specific warnings that aren't actual issues
@@ -62,7 +68,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   optimizeDeps: {
-    include: ['date-fns'],
+    include: ['date-fns', 'react-day-picker', 'terser'],
     force: true,
     esbuildOptions: {
       // Node.js global for polyfills
